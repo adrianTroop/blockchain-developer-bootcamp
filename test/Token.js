@@ -7,7 +7,7 @@ const tokens = (n) => {
 }
 
 describe("Token", () => {
-    let Token, accounts, deployer
+    let Token, accounts, deployer, receiver
 
     beforeEach(async ()=> {
         // We fetch the token from the BC
@@ -16,6 +16,7 @@ describe("Token", () => {
 
         accounts = await ethers.getSigners()
         deployer = accounts[0]
+        receiver = accounts[1]
     })
     describe("Deployment", () =>{
         const name = "Dapp University"
@@ -37,6 +38,21 @@ describe("Token", () => {
         })
         it('Assigns total supply to deployer', async () =>{
             expect(await token.balanceOf(deployer.address)).to.equal(totalSupply)
+        })
+    })
+    describe("Sending Tokens", () =>{
+        let amount, transaction, result
+
+        beforeEach(async () => {
+            amount = tokens(100)
+            transaction = await token.connect(deployer).transfer(receiver.address, amount)
+            result = await transaction.wait()
+        })
+        it('Transfers Token balance', async () => {
+            //connect to the blockchain
+            //Check balance
+            expect(await token.balanceOf(deployer.address)).to.equal(tokens(999900))
+            expect(await token.balanceOf(receiver.address)).to.equal(amount)
         })
     })
   });

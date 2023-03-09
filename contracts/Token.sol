@@ -11,11 +11,34 @@ contract Token{
     uint256 public totalSupply;
 
     mapping(address => uint256) public balanceOf;
+    //Events send notifications to the Bc as its required
 
-    constructor(string memory _name,string memory _symbol, uint256 _totalSupply){
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 value
+        );
+
+    constructor(
+        string memory _name,
+        string memory _symbol
+        , uint256 _totalSupply
+        ){
         name = _name;
         symbol = _symbol;
         totalSupply = _totalSupply * (10**decimals);
         balanceOf[msg.sender] = totalSupply;
     }
+
+    function transfer(address _to, uint256 _value) 
+        public 
+        returns (bool success){
+        //Check if the account has enough tokens with require its sort of an IF
+        require(balanceOf[msg.sender] >= _value);
+
+        //Take from one account and move to another
+        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
+        balanceOf[_to] = balanceOf[_to] + _value;
+        return true;
+    } 
 }
