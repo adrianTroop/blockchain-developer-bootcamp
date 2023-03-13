@@ -11,11 +11,19 @@ contract Token{
     uint256 public totalSupply;
 
     mapping(address => uint256) public balanceOf;
-    //Events send notifications to the Bc as its required
+    //Nested array the address has a list of approve address and the amounts inside.
+    mapping(address => mapping(address => uint256)) public allowance;
 
+    //Events send notifications to the Bc as its required
     event Transfer(
         address indexed from,
         address indexed to,
+        uint256 value
+        );
+    
+    event Approval(
+        address indexed owner,
+        address indexed spender,
         uint256 value
         );
 
@@ -44,5 +52,16 @@ contract Token{
         emit Transfer(msg.sender, _to, _value);
 
         return true;
-    } 
+    }
+    function approve(address _spender, uint256 _value)
+        public 
+        returns (bool success){
+            require(_spender != address(0));    
+
+            allowance[msg.sender][_spender] = _value;
+            //Emit event to the BC to check the mov.
+            emit Approval(msg.sender, _spender, _value);
+            return true; 
+        }
+ 
 }
