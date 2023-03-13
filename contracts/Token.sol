@@ -35,10 +35,14 @@ contract Token{
         returns (bool success){
         //Check if the account has enough tokens with require its sort of an IF
         require(balanceOf[msg.sender] >= _value);
+        require(_to != address(0));
 
         //Take from one account and move to another
         balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
         balanceOf[_to] = balanceOf[_to] + _value;
+
+        emit Transfer(msg.sender, _to, _value);
+
         return true;
     } 
 }
