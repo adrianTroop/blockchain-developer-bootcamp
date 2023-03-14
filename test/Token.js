@@ -139,8 +139,8 @@ describe("Token", () => {
             })
         })
         describe("Failure",() => {
-            const invalidAmount = tokens(100000000)
             it('Try to send too many tokens', async () => {
+                const invalidAmount = tokens(100000000)
                 await expect(token.connect(exchange).transferFrom(deployer.address, receiver.address, invalidAmount))
             })
         })
