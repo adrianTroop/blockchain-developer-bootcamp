@@ -29,8 +29,8 @@ contract Token{
 
     constructor(
         string memory _name,
-        string memory _symbol
-        , uint256 _totalSupply
+        string memory _symbol,
+        uint256 _totalSupply
         ){
         name = _name;
         symbol = _symbol;
@@ -43,16 +43,24 @@ contract Token{
         returns (bool success){
         //Check if the account has enough tokens with require its sort of an IF
         require(balanceOf[msg.sender] >= _value);
-        require(_to != address(0));
 
-        //Take from one account and move to another
-        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;
-        balanceOf[_to] = balanceOf[_to] + _value;
-
-        emit Transfer(msg.sender, _to, _value);
+        _transfer(msg.sender, _to, _value);
 
         return true;
     }
+
+    function _transfer(
+        address _from,
+        address _to,
+        uint256 _value) internal{
+        require(_to != address(0));
+
+        balanceOf[_from] = balanceOf[_from] - _value;
+        balanceOf[_to] = balanceOf[_to] + _value;
+    
+        emit Transfer(_from, _to, _value);
+    }
+
     function approve(address _spender, uint256 _value)
         public 
         returns (bool success){
@@ -63,5 +71,18 @@ contract Token{
             emit Approval(msg.sender, _spender, _value);
             return true; 
         }
+    function transferFrom(address _from, address _to, uint256 _value)
+        public 
+        returns (bool success){
+            //Checking if the _from value is authorised to spend tokens from that account.
+            require(_value <= allowance[_from][msg.sender]);
+            require(_value <= balanceOf[_from]);
+
+            //Reset allowance
+            allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
+
+            _transfer(_from, _to, _value);
+            return true;
+    }
  
 }
