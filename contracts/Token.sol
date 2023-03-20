@@ -75,8 +75,9 @@ contract Token{
         public 
         returns (bool success){
             //Checking if the _from value is authorised to spend tokens from that account.
-            require(_value <= allowance[_from][msg.sender]);
-            require(_value <= balanceOf[_from]);
+            //Delete the string on require before deploying
+            require(_value <= allowance[_from][msg.sender], "insuficiente allowance");
+            require(_value <= balanceOf[_from], "insufient balance");
 
             //Reset allowance
             allowance[_from][msg.sender] = allowance[_from][msg.sender] - _value;
