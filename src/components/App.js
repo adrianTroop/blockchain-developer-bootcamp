@@ -1,8 +1,13 @@
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
 import '../App.css';
+import TOKEN_ABI from '../abis/Token.json'
+import EXCHANGE_ABI from '../abis/Exchange.json'
+import config from '../config.json'
 
 function App() {
+
+  
 
   //Connecting to the blockchain
   const loadBlockchainData = async () => {
@@ -13,6 +18,10 @@ function App() {
     //Breaking down values 
     const {chainId} = await provider.getNetwork()
     console.log(chainId)
+
+    const DappToken = new ethers.Contract(config[chainId].Dapp.address, TOKEN_ABI, provider)
+    console.log(await DappToken.symbol())
+    console.log(await DappToken.address)
   }
 
   useEffect(() => {
