@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { ethers } from 'ethers';
-import '../App.css';
 import TOKEN_ABI from '../abis/Token.json'
 import EXCHANGE_ABI from '../abis/Exchange.json'
 import config from '../config.json'
