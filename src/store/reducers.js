@@ -18,6 +18,11 @@ export const provider = (state = {} , action) =>{
                 ...state,
                 account: action.account
             }
+        case 'ETHER_BALANCE_LOADED':
+            return {
+                ...state,
+                balance: action.balance
+            }
         default:
             return state     
     }
@@ -48,5 +53,19 @@ export const tokens = (state = DEFAULT_TOKENS_STATE , action) =>{
             }
         default:
             return state     
+    }
+}
+
+export const exchange = (state = {loaded: false, contract: {}} , action) =>{
+    switch(action.type){
+        case 'EXCHANGE_LOADED':
+            return{
+                //check current state but dont modify it just update it
+                ...state,
+                loaded:true,
+                contract: action.exchange
+            }
+        default:
+            return state
     }
 }

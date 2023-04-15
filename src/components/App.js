@@ -5,7 +5,8 @@ import config from '../config.json'
 import { loadProvider,
           loadNetwork,
           loadAccount,
-          loadTokens
+          loadTokens,
+          loadExchange
        } from '../store/interactions';
 
 
@@ -15,14 +16,19 @@ function App() {
 
   //Connecting to the blockchain
   const loadBlockchainData = async () => {
-    await loadAccount(dispatch)
 
     const provider = loadProvider(dispatch)
-    //Breaking down values 
+    //Breaking down values and fetching current networdk chainID 31337 kovan:42
     const chainId = await loadNetwork(provider,dispatch)
+    //We pass the provider so we can load the balance from metamask
+    await loadAccount(provider, dispatch)
+    //Load token contracts
     const DApp = config[chainId].Dapp
     const mEth = config[chainId].mETH
     await loadTokens(provider, [DApp.address,mEth.address], dispatch)
+    
+    const exchangeConfig = config[chainId].exchange
+    await loadExchange(provider,exchangeConfig.address,dispatch)
   }
 
   useEffect(() => {
