@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux'
-import EXCHANGE_ABI from '../abis/Exchange.json'
 import config from '../config.json'
 
 import { loadProvider,
           loadNetwork,
           loadAccount,
-          loadToken
+          loadTokens
        } from '../store/interactions';
 
 
@@ -21,8 +20,9 @@ function App() {
     const provider = loadProvider(dispatch)
     //Breaking down values 
     const chainId = await loadNetwork(provider,dispatch)
-
-    await loadToken(provider, config[chainId].Dapp.address, dispatch)
+    const DApp = config[chainId].Dapp
+    const mEth = config[chainId].mETH
+    await loadTokens(provider, [DApp.address,mEth.address], dispatch)
   }
 
   useEffect(() => {
