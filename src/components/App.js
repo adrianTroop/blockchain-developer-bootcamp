@@ -9,6 +9,8 @@ import { loadProvider,
           loadExchange
        } from '../store/interactions';
 
+import Navbar from './Navbar';
+
 
 function App() {
 
@@ -20,10 +22,17 @@ function App() {
     const provider = loadProvider(dispatch)
     //Breaking down values and fetching current networdk chainID 31337 kovan:42
     const chainId = await loadNetwork(provider,dispatch)
+
+    window.ethereum.on('chainChanged', ()=>{
+      window.location.reload()
+    })
     //We pass the provider so we can load the balance from metamask
-    await loadAccount(provider, dispatch)
+    //Whenever the metamask accounts change the page will get reloaded.
+    window.ethereum.on('accountsChanged', () => {
+      loadAccount(provider, dispatch)
+    })
     //Load token contracts
-    const DApp = config[chainId].Dapp
+    const DApp = config[chainId].DApp
     const mEth = config[chainId].mETH
     await loadTokens(provider, [DApp.address,mEth.address], dispatch)
     
@@ -39,7 +48,7 @@ function App() {
   return (
     <div>
 
-      {/* Navbar */}
+      <Navbar/>
 
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
