@@ -41,8 +41,9 @@ export const tokens = (state = DEFAULT_TOKENS_STATE , action) =>{
                 //check current state but dont modify it just update it
                 ...state,
                 loaded:true,
-                contracts: [...state.contracts, action.token],
-                symbols: [...state.symbols, action.symbol]
+                // we update the current token loaded so i doesnt add unlimited tokens #BUGFIXED ON VIDEO
+                contracts: [action.token],
+                symbols: [action.symbol]
             }
         case 'TOKEN_2_LOADED':
             return{
