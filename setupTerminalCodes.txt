@@ -1,0 +1,17 @@
+Set up hardhat node is : 
+    npx hardhat node
+
+Deploy info to the blockchain
+
+    File 1 (Acccounts)
+
+        npx hardhat run --network localhost scripts/1_deploy.js
+
+    File 2 (Transactions)
+
+
+        npx hardhat run --network localhost scripts/2_seed-exchange.js
+
+Run WebServer
+
+    npm start run

@@ -1,7 +1,6 @@
 import { ethers } from 'ethers'
 import TOKEN_ABI from '../abis/Token.json'
 import EXCHANGE_ABI from '../abis/Exchange.json'
-//import { provider } from './reducers'
 
 export const loadProvider = (dispatch) => {
     //connecting ethers to the BC
@@ -19,16 +18,16 @@ export const loadNetwork = async (provider, dispatch) => {
     return chainId
 }
 
+
 export const loadAccount = async (provider, dispatch) => {
     const accounts = await window.ethereum.request({method : 'eth_requestAccounts'})
     const account = ethers.utils.getAddress(accounts[0])
     
     dispatch({ type : 'ACCOUNT_LOADED', account })
-
+    //Had to change this as i think i probably changed this when i updated the other funciton.
     let balance = await provider.getBalance(account)
     //this returns the gwei amount but we want to pass it as Ether amount.
     balance = ethers.utils.formatEther(balance)
-
     dispatch({ type : 'ETHER_BALANCE_LOADED', balance})
 
     return account
@@ -52,4 +51,21 @@ export const loadExchange = async (provider, address, dispatch) => {
     dispatch({type: 'EXCHANGE_LOADED', exchange})
 
     return exchange
+}
+
+//LOADS USER BALANCE (WALLET & EXCHANGE)
+
+export const loadBalances = async (exchange, tokens, account, dispatch) => {
+    let balance = ethers.utils.formatUnits(await tokens[0].balanceOf(account),18)
+    dispatch({type: 'TOKEN_1_BALANCE_LOADED', balance})
+    //We use the same variable becase we dispatch so we can re write the variable
+    balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[0].address, account),18)
+    dispatch({type: 'EXCHANGE_TOKEN_1_BALANCE_LOADED', balance})
+
+    //Second Token
+    balance = ethers.utils.formatUnits(await tokens[1].balanceOf(account),18)
+    dispatch({type: 'TOKEN_2_BALANCE_LOADED', balance})
+
+    balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[1].address, account),18)
+    dispatch({type: 'EXCHANGE_TOKEN_2_BALANCE_LOADED', balance})
 }
