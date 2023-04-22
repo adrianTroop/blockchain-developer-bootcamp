@@ -53,6 +53,14 @@ export const loadExchange = async (provider, address, dispatch) => {
     return exchange
 }
 
+//Function that subscribe to events
+export const subscribeToEvents = (exchange, dispatch)=>{
+    exchange.on('Deposit', (token, user, amount, balance, event)=>{
+        //Notify app that transfer was succesful
+        dispatch({type : 'TRANSFER_SUCCESS', event})
+    })
+}
+
 //LOADS USER BALANCE (WALLET & EXCHANGE)
 
 export const loadBalances = async (exchange, tokens, account, dispatch) => {
@@ -68,4 +76,29 @@ export const loadBalances = async (exchange, tokens, account, dispatch) => {
 
     balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[1].address, account),18)
     dispatch({type: 'EXCHANGE_TOKEN_2_BALANCE_LOADED', balance})
+}
+
+//Deposit and withdraws
+
+// Transfer Tokens Deposit or Withdraw
+export const transferTokens = async (provider, exchange, transferType, token, amount, dispatch) => {
+    let transaction
+    
+    dispatch({ type: 'TRANSFER_REQUEST' })
+
+    try{
+        //They need to approve tokens and then sedn them.
+        //User will be the signer
+        const signer = await provider.getSigner()
+        const amountToTransfer = ethers.utils.parseUnits(amount.toString(),18)
+        transaction = await token.connect(signer).approve(exchange.address, amountToTransfer)
+        await transaction.wait()
+
+        transaction = await exchange.connect(signer).depositToken(token.address, amountToTransfer)
+        
+        await transaction.wait()
+    }catch(error){
+        dispatch({type: 'TRANSFER_FAIL'})
+    }
+
 }

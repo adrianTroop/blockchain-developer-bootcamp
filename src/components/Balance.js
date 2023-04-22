@@ -3,18 +3,24 @@ import { useDispatch, useSelector  } from 'react-redux'
 
 import dapp from '../assets/dapp.svg'
 //trigger those
-import { loadBalances } from '../store/interactions';
+import { loadBalances,
+         transferTokens
+} from '../store/interactions';
 
 const Balance = () => {
 
+
     const [token1TransferAmount, setToken1TransferAmount] = useState(0)
     const dispatch = useDispatch()
-    //Import symbols from Redux Store
     
+    const provider = useSelector(state => state.provider.connection)
+
+    //Import symbols from Redux Store
     const account = useSelector(state => state.provider.account)
      
     const exchange = useSelector(state => state.exchange.contract)
     const exchangeBalances = useSelector(state => state.exchange.balances)
+    const transferInProgress = useSelector(state => state.exchange.transferInProgress)
     
     const symbols = useSelector(state => state.tokens.symbols)
     const tokens = useSelector(state => state.tokens.contracts)
@@ -25,12 +31,23 @@ const Balance = () => {
     const amountHandler = (e, token) =>{
         if(token.address === tokens[0].address){
             setToken1TransferAmount(e.target.value)
+            setToken1TransferAmount(0)
         }
     }
+
+    //[x]Step 1: do transfer
+    //[x]Step 2: Notify app that transfer is pending
+    //[x]Step 3: Get confirmation from blockchain that transfer was succesful
+    //[x]Step 4: Notify app that transfer was succesful
+    //[]Step 5: Handle transfer fails - notify app
+
+
+
     const depositHandler = (e, token) => {
+        //prevents the page from refreshing
         e.preventDefault()
         if(token.address === tokens[0].address){
-            
+            transferTokens(provider, exchange, 'Deposit', token, token1TransferAmount, dispatch)
         }
     }
 
@@ -39,7 +56,8 @@ const Balance = () => {
         if(exchange && tokens[0] && tokens[1] && account){
             loadBalances(exchange, tokens, account, dispatch)
         } 
-    }, [exchange, tokens, account])
+        //If any of this reload the page again
+    }, [exchange, tokens, account, dispatch, transferInProgress])
 
     return ( 
       <div className='component exchange__transfers'>
@@ -62,7 +80,12 @@ const Balance = () => {
 
           <form onSubmit={(e) => depositHandler(e,tokens[0]) }>
             <label htmlFor="token0">{ symbols && symbols[0]} Amount</label>
-            <input type="text" id='token0' placeholder='0.0000' onChange={(e) => amountHandler(e, tokens[0])}/>
+            <input 
+                type="text"
+                id='token0'
+                placeholder='0.0000'
+                value={token1TransferAmount === 0 ? '' : token1TransferAmount}
+                onChange={(e) => amountHandler(e, tokens[0])}/>
   
             <button className='button' type='submit'>
               <span>{ "Deposit" }</span>

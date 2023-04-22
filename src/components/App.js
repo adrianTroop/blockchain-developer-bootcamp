@@ -6,7 +6,8 @@ import { loadProvider,
           loadNetwork,
           loadAccount,
           loadTokens,
-          loadExchange
+          loadExchange,
+          subscribeToEvents
        } from '../store/interactions';
 
 import Navbar from './Navbar';
@@ -39,13 +40,17 @@ function App() {
     await loadTokens(provider, [DApp.address,mEth.address], dispatch)
     
     const exchangeConfig = config[chainId].exchange
-    await loadExchange(provider,exchangeConfig.address,dispatch)
+    const exchange = await loadExchange(provider,exchangeConfig.address,dispatch)
+
+    // We want to set up the subscribee event here to be able to use it on all the events so we set it up in the APP.js(Top element)
+  
+    //Subscribing to events Listening to events
+    subscribeToEvents(exchange, dispatch)
+  
   }
 
   useEffect(() => {
     loadBlockchainData() 
-
-    //more
   })
   return (
     <div>
