@@ -33,6 +33,7 @@ const Navbar = () => {
     const connectHandler = async () => {
         await loadAccount(provider, dispatch)
     }
+
     const networkHandler = async (e) => {
         //Network option hanlder take the event value and let us know what network is it
         await window.ethereum.request({
@@ -46,7 +47,7 @@ const Navbar = () => {
       <div className='exchange__header grid'>
         <div className='exchange__header--brand flex'>
             <img src={ logo } className='logo' alt='DApp Logo'></img>
-            <h1>DApp Token Exchange</h1>
+            <h1>Token Exchange</h1>
         </div>
   
         <div className='exchange__header--networks flex'>
