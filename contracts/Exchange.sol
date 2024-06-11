@@ -9,7 +9,7 @@ import "./Token.sol";
 contract Exchange{
     address public feeAccount;
     uint256 public feePercent;
-    //mapping of balances in exchange
+    //mapping of balances in exchange of the different tokens
     mapping(address => mapping(address => uint256)) public tokens;
     mapping(uint256 => _Order) public orders;
     uint256 public orderCount;
@@ -58,7 +58,7 @@ contract Exchange{
         address creator,
         uint256 timestamp 
         );
-
+    //DETAILS OF THE ORDERS
     struct _Order {
         uint256 id; // unique identifier for the order
         address user; // User who made the order
@@ -78,6 +78,7 @@ contract Exchange{
     function depositToken(address _token, uint256 _amount) public{
         //Transfer token to exchange
         //Talk to the Token.sol contract
+        //Require to send tokens to exchange to have a layer of security in case soemthing happens
         require(Token(_token).transferFrom(msg.sender, address(this),_amount));
         //Update user balance
         tokens[_token][msg.sender] = tokens[_token][msg.sender] + _amount;
@@ -90,6 +91,7 @@ contract Exchange{
         //update user balance
         Token(_token).transfer(msg.sender, _amount);
         //Transfer token to the user
+        // if there is no tokens the value is ZERO by default
         tokens[_token][msg.sender] = tokens[_token][msg.sender] - _amount;
         //Emit Event
         emit Withdraw(_token, msg.sender,_amount,tokens[_token][msg.sender]);
@@ -103,6 +105,7 @@ contract Exchange{
     {
         return tokens[_token][_user];
     }
+    // MAKE AND CANCEL ORDERS
 
     function makeOrder(
         address _tokenGet,
@@ -138,7 +141,7 @@ contract Exchange{
         );
     }
     function cancelOrder(uint256 _id) public{
-        //Fetching order
+        //Fetching order the opposite of memory
         _Order storage _order = orders[_id];
         //Require event
         require(address(_order.user) == msg.sender);

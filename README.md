@@ -11,3 +11,7 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.js
 ```
+How to operate the localhost hardhat network and seed the exchange
+
+npx hardhat node
+npx hardhat run --network localhost scripts/1_deploy.js

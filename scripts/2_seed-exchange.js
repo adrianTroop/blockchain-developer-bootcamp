@@ -1,10 +1,12 @@
 const { ethers } = require("hardhat");
 const config = require('../src/config.json')
 
+//Format tokens
 const tokens = (n) => {
     return ethers.utils.parseUnits(n.toString(), "ether")
 }
 
+//Wait time
 const wait = (seconds) => {
     const milliseconds = seconds *1000
     return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -16,7 +18,7 @@ const wait = (seconds) => {
 async function main() {
 
     const {chainId} = await ethers.provider.getNetwork()
-    console.log("Using chainid", chainId)
+    console.log("Using chainId", chainId)
 
     //get accounts
     const  accounts = await ethers.getSigners()
@@ -38,8 +40,7 @@ async function main() {
     const receiver = accounts[1]
     let amount = tokens(10000)
 
-    //Give tokens to account 1
-
+    //Give tokens to account 1 
     let transaction, result
     // send 10000 mETH from account 0 to 1
     transaction = await mETH.connect(sender).transfer(receiver.address, amount)
@@ -89,17 +90,26 @@ async function main() {
     result = await transaction.wait()
     console.log(`Filled order from ${user2.address}\n`)
 
+    transaction = await exchange.connect(user1).makeOrder(mETH.address,tokens(200),DApp.address, tokens(20))
+    result = await transaction.wait()
+    console.log(`Made order from ${user1.address}\n`)
+    
+    orderId = result.events[0].args.id
+    transaction = await exchange.connect(user2).fillOrder(orderId)
+    result = await transaction.wait()
+    console.log(`Filled order from ${user1.address}\n`)
+
     //CREATE MORE ORDERS TO PRACTISE
     await wait(1)
 
-    for(i=0;i<10;i++){
+    for(i=0;i<5;i++){
         transaction = await exchange.connect(user1).makeOrder(mETH.address,tokens(10*i),DApp.address, tokens(10*i))
         result = await transaction.wait()
         console.log(`Made order ${i} from ${user1.address}\n`)
         await wait(1)
     }
 
-    for(i=0;i<10;i++){
+    for(i=0;i<5;i++){
         transaction = await exchange.connect(user2).makeOrder(DApp.address,tokens(10*i),mETH.address, tokens(10*i))
         result = await transaction.wait()
         console.log(`Made order ${i} from ${user2.address}\n`)

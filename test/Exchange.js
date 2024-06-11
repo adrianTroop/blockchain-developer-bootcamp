@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { result } = require("lodash");
+//const { result } = require("lodash");
 
 //Convert to gwei
 const tokens = (n) => {
@@ -50,7 +50,7 @@ describe("Exchange", () => {
                 transaction = await token1.connect(user1).approve(exchange.address, amount)
                 result = await transaction.wait()
                 
-                //Deposit Token
+                //Deposit Token to the user from exchange so doesnt show an error
                 transaction = await exchange.connect(user1).depositToken(token1.address, amount)
                 result = await transaction.wait()
             })
@@ -71,6 +71,7 @@ describe("Exchange", () => {
             })
         })
         describe("Failure", () => {
+            //Trying to send tokens without approving
             it("Fails when no tokens are approve", async ()=>{
                 await expect(exchange.connect(user1).depositToken(token1.address,amount)).to.be.reverted
             })
