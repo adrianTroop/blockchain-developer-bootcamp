@@ -1,4 +1,7 @@
 import { useRef, useState } from "react";
+import { useSelector, useDispatch } from 'react-redux'
+
+import { makeBuyOrder, makeSellOrder } from "../store/interactions";
 
 const Order = () => {
     //Same as Balance to keep the amount
@@ -6,6 +9,12 @@ const Order = () => {
     const [isBuy, setIsBuy] = useState(true)
     const [amount, setAmount] = useState(0)
     const [price, setPrice] = useState(0)
+
+    //DATA TO MAKE THE ORDER
+    const provider = useSelector(state => state.provider.connection)
+    const tokens = useSelector(state => state.tokens.contracts)
+    const exchange = useSelector(state => state.exchange.contract)
+    const dispatch = useDispatch()
 
     const buyRef = useRef(null)
     const sellRef = useRef(null)
@@ -26,9 +35,12 @@ const Order = () => {
   }
 
     const buyHandler = (e) => {
+      //Connects to BC to make the orders
       e.preventDefault()
       //Creates a buy order
-      console.log("BUY")
+      //We calling the makebuy order when we press the button
+      //We setting the order based on amount and price from the variables as an object.
+      makeBuyOrder(provider, exchange, tokens, {amount, price}, dispatch)
       setAmount(0)
       setPrice(0)
     }
@@ -37,6 +49,7 @@ const Order = () => {
       e.preventDefault()
       //Creates a sell order
       console.log("SELL")
+      makeSellOrder(provider, exchange, tokens, {amount, price}, dispatch)
       setAmount(0)
       setPrice(0)
     }
@@ -52,20 +65,34 @@ const Order = () => {
         </div>
   
         <form onSubmit={ isBuy ? buyHandler : sellHandler }>
+        
+          {isBuy ? (
+            <label htmlFor="amount">Buy Amount</label>
+          ) : (
+            <label htmlFor="amount">Sell Amount</label>
+          )}
+
           <input 
             type="text"
             id='amount' 
             placeholder='0.0000'
             value={amount === 0 ? '' : amount}
-            onChange={(e) => setAmount(e.target.value)}/>
+            onChange={(e) => setAmount(e.target.value)}
+          />
+          
+          {isBuy ? (
+            <label htmlFor="price">Buy Price</label>
+          ) : (
+            <label htmlFor="price">Sell Price</label>
+          )}
   
           <input 
             type="text" 
             id='price' 
             placeholder='0.0000'
-            value={amount === 0 ? '' : amount}
-            onChange={(e) => setAmount(e.target.value)}/>
-  
+            value={price === 0 ? '' : price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
   
           <button className='button button--filled' type='submit'>
             { isBuy ? <span> Buy Order </span> : <span> Sell Order </span>}

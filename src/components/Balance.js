@@ -9,11 +9,8 @@ import { loadBalances,
 } from '../store/interactions';
 
 const Balance = () => {
-
-    //CONTINUE AT DEPOSTI 2 MIN 10
-
     const [isDeposit, setIsDeposit ] = useState(true)
-
+    //Putting the amount field into the redux store to be able to use. USE HOOK
     const [token1TransferAmount, setToken1TransferAmount] = useState(0)
     const [token2TransferAmount, setToken2TransferAmount] = useState(0)
 
@@ -28,6 +25,7 @@ const Balance = () => {
     const exchangeBalances = useSelector(state => state.exchange.balances)
     const transferInProgress = useSelector(state => state.exchange.transferInProgress)
     
+    //Import symbols from Redux 
     const symbols = useSelector(state => state.tokens.symbols)
     const tokens = useSelector(state => state.tokens.contracts)
     
@@ -95,7 +93,7 @@ const Balance = () => {
         if(exchange && tokens[0] && tokens[1] && account){
             loadBalances(exchange, tokens, account, dispatch)
         } 
-        //If any of this reload the page again
+        //If any of this reload the page again dispatch need?
     }, [exchange, tokens, account, dispatch, transferInProgress])
 
     return ( 

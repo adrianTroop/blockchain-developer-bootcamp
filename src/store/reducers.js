@@ -1,11 +1,16 @@
 //Reducers
 //This 'export' allows to use this info in other files.
+
+import { isError } from "lodash"
+
+//handles it all the connection info
 export const provider = (state = {} , action) =>{
     switch(action.type){
         case 'PROVIDER_LOADED':
             return{
-                //check current state but dont modify it just update it
+                //check current state but dont modify it YOU Just have to update it
                 ...state,
+                //Add the connection from the action to the connection
                 connection: action.connection
             }
         case 'NETWORK_LOADED':
@@ -33,7 +38,7 @@ const DEFAULT_TOKENS_STATE = {
     contracts:[],
     symbols: [] 
 }
-
+//handles all the changes with Tokens
 export const tokens = (state = DEFAULT_TOKENS_STATE , action) =>{
     switch(action.type){
         case 'TOKEN_1_LOADED':
@@ -42,6 +47,7 @@ export const tokens = (state = DEFAULT_TOKENS_STATE , action) =>{
                 ...state,
                 loaded:true,
                 // we update the current token loaded so i doesnt add unlimited tokens #BUGFIXED ON VIDEO
+                //WE NEED TO UPDATE THIS MAYBE WITH [...state.contracts] befpfre the action token #BugFIXED
                 contracts: [action.token],
                 symbols: [action.symbol]
             }
@@ -76,10 +82,15 @@ const DEFAULT_EXCHANGE_STATE = {
     transaction: {
         isSuccesful:false
     },
+    allOrders: {
+        loaded: false,
+        data: []
+    },
     events: []
 }
 
 export const exchange = (state = DEFAULT_EXCHANGE_STATE , action) =>{
+    let index, data
     switch(action.type){
         case 'EXCHANGE_LOADED':
             return{
@@ -137,7 +148,48 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE , action) =>{
                 },
                 transferInProgress: false
             }
+        
+        case 'NEW_ORDER_REQUEST':
+            return{
+                ...state,
+                transaction:{
+                    transactionType: 'New Order',
+                    isPending: true,
+                    isSuccesful: false
+                },
+            } 
 
+        case 'NEW_ORDER_SUCCESS':
+            //Prevent duplicate orders
+            index = state.allOrders.data.findIndex(order => order.id === action.orderId)
+            if(index === -1){
+                data = [...state.allOrders.data, action.order]
+            } else {
+                data = state.allOrders.data
+            }
+            return{
+                ...state,
+                allOrders: {
+                    ...state.allOrders,
+                    data
+                },
+                transaction:{
+                    transactionType: 'New Order',
+                    isPending: false,
+                    isSuccesful: true
+                },
+            }
+
+        case 'NEW_ORDER_FAIL':
+            return {
+                ...state,
+                transaction: {
+                    transactionType: 'New Order',
+                    isPending: false,
+                    isSuccesful: false,
+                    isError: true
+                },
+            }
         default:
             return state
     }

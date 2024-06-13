@@ -9,20 +9,19 @@ import { loadAccount } from '../store/interactions'
 
 import config from '../config.json'
 
+////////////////////////////////////////////////////////////////////
+/* SELECT DOESNT WORK WHEN YOU CHANGE TO A POS NETWORK AND IT DOESNT UPDATE THE STATE PROBABLY AND THE PAGE DOESNT LOAD
 
 
+YOU NEED TO LOOK INTO THIS!!!
 
-/*
-NOTES: 
-EL DESPLEGABLE NO CAMBIA COMO TIENE QUE CAMBIAR
-EL LINK NO FUNCIONA A LA GOERLI
 
 */
-
 
 const Navbar = () => {
 
     //import info from REDUX with Hooks
+    //Basically you get info from the Redux Database
     const provider = useSelector(state => state.provider.connection)
     const chainId = useSelector(state => state.provider.chainId)
     const account = useSelector(state => state.provider.account)
@@ -35,11 +34,12 @@ const Navbar = () => {
     }
 
     const networkHandler = async (e) => {
+        const newNetwork = e.target.value;
         //Network option hanlder take the event value and let us know what network is it
         await window.ethereum.request({
             //Built in function to request change network
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: e.target.value }]
+            params: [{ chainId: newNetwork}]
         })
     }
 
@@ -55,11 +55,12 @@ const Navbar = () => {
 
             { chainId && (
                 <select name='networks' id='networks' value={config[chainId] ? `0x${chainId.toString(16)}` : `0`} onChange={ networkHandler }>
-                    <option value="0" disabled>Select Networks</option>
+                    <option value="0" disabled>Select Network</option>
                     <option value="0x7A69">Localhost</option>
-                    <option value="0x5">Goerli</option>
+                    <option value="0xaa36a7">Sepolia</option>
                 </select>
-            )}
+            )
+            }
         </div>
 
         <div className='exchange__header--account flex'>

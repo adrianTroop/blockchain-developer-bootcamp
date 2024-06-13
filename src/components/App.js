@@ -14,6 +14,7 @@ import Navbar from './Navbar';
 import Markets from './Markets';
 import Balance from './Balance';
 import Order from './Order';
+import OrderBook from './OrderBook';
 
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
 
   //Connecting to the blockchain
   const loadBlockchainData = async () => {
-
+    //Like this we dont get info straight from Bc we get it from Redux
     const provider = loadProvider(dispatch)
     //Breaking down values and fetching current networdk chainID 31337 kovan:42
     const chainId = await loadNetwork(provider,dispatch)
@@ -35,10 +36,12 @@ function App() {
     window.ethereum.on('accountsChanged', () => {
       loadAccount(provider, dispatch)
     })
-    //Load token contracts
-    const DApp = config[chainId].DApp
-    const mEth = config[chainId].mETH
-    await loadTokens(provider, [DApp.address,mEth.address], dispatch)
+
+    
+    //Load token contracts maybe i move the address to the const definition Still not sure
+    const DApp = config[chainId].DApp.address
+    const mEth = config[chainId].mETH.address
+    await loadTokens(provider, [DApp,mEth], dispatch)
     
     const exchangeConfig = config[chainId].exchange
     const exchange = await loadExchange(provider,exchangeConfig.address,dispatch)
@@ -61,7 +64,6 @@ function App() {
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
 
-          
           < Markets />
 
           < Balance />
@@ -77,7 +79,7 @@ function App() {
 
           {/* Trades */}
 
-          {/* OrderBook */}
+          < OrderBook />
 
         </section>
       </main>

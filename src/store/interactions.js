@@ -1,13 +1,13 @@
 import { ethers } from 'ethers'
 import TOKEN_ABI from '../abis/Token.json'
 import EXCHANGE_ABI from '../abis/Exchange.json'
+import { exchange, provider } from './reducers'
 
 export const loadProvider = (dispatch) => {
     //connecting ethers to the BC
     const connection = new ethers.providers.Web3Provider(window.ethereum)
     //In Js you dont need to put the type the language already know.
-    dispatch({type:'PROVIDER_LOADED', connection:connection})
-
+    dispatch({type:'PROVIDER_LOADED', connection})
     return connection
 }
 
@@ -53,8 +53,9 @@ export const loadExchange = async (provider, address, dispatch) => {
     return exchange
 }
 
-//Function that subscribe to events
+//Function that subscribe to events and get the confirmation from BC that transfers are succesful
 export const subscribeToEvents = (exchange, dispatch)=>{
+    //Subscribe to the event deposit and take all the values to check details
     exchange.on('Deposit', (token, user, amount, balance, event)=>{
         //Notify app that transfer was succesful
         dispatch({type : 'TRANSFER_SUCCESS', event})
@@ -63,14 +64,18 @@ export const subscribeToEvents = (exchange, dispatch)=>{
         //Notify app that transfer was succesful
         dispatch({type : 'TRANSFER_SUCCESS', event})
     })
+    //We listening to the event and the function need to accept all the values from the event.
+    exchange.on('Order', (id, user,tokenGet,amountGet,tokenGive,amountGive,timestamp,event) => {
+        const order = event.args
+        dispatch({type: 'NEW_ORDER_SUCCESS', order, event})
+    })
 }
 
 //LOADS USER BALANCE (WALLET & EXCHANGE)
-
 export const loadBalances = async (exchange, tokens, account, dispatch) => {
     let balance = ethers.utils.formatUnits(await tokens[0].balanceOf(account),18)
+    //We use the same variable because we dispatch so we can re write the variable
     dispatch({type: 'TOKEN_1_BALANCE_LOADED', balance})
-    //We use the same variable becase we dispatch so we can re write the variable
     balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[0].address, account),18)
     dispatch({type: 'EXCHANGE_TOKEN_1_BALANCE_LOADED', balance})
 
@@ -81,6 +86,21 @@ export const loadBalances = async (exchange, tokens, account, dispatch) => {
     balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[1].address, account),18)
     dispatch({type: 'EXCHANGE_TOKEN_2_BALANCE_LOADED', balance})
 }
+
+////////////////////////////////////////////////////////////
+//////////////  LOAD ALL ORDERS /////////////////////////////
+
+export const loadAllOrders = async(provider, exchange, dispatch)
+{
+    const block = await provider.getBlockNumber()
+
+    //Getting all order throught a query on the event so we can see all past orders.
+    const orderStream = await exchange.queryFilter('Order', 0, block)
+    const allOrders = orderStream.map(event => event.args)
+
+    dispatch({type: 'ALL_ORDERS_LOADED', allOrders})
+}
+
 
 //Deposit and withdraws
 
@@ -107,4 +127,55 @@ export const transferTokens = async (provider, exchange, transferType, token, am
         dispatch({type: 'TRANSFER_FAIL'})
     }
 
+}
+
+////////// ORDERS BUY AND SELL /////////////////
+
+export const makeBuyOrder = async (provider,exchange, tokens, order, dispatch) => {
+    //Make orders
+    /*
+    address _tokenGet,
+    uint256 _amountGet,
+    address _tokenGive,
+    uint256 _amountGive (orderAmount * orderPrice)
+    */
+    const tokenGet = tokens[0].address
+    const amountGet = ethers.utils.parseUnits(order.amount,18)
+    const tokenGive = tokens[1].address
+    const amountGive = ethers.utils.parseUnits((order.amount * order.price).toString() ,18)
+    dispatch({type: 'NEW_ORDER_REQUEST'})
+    
+    try{
+        const signer = await provider.getSigner()
+        // the name Makebuy order is a function in exchange
+        const transaction = await exchange.connect(signer).makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+        await transaction.wait()
+    } catch(error) {
+        dispatch({type: 'NEW_ORDER_FAIL'})
+    } 
+}
+
+//SELL ORDER 
+export const makeSellOrder = async (provider,exchange, tokens, order, dispatch) => {
+    //Make orders
+    /*
+    address _tokenGet,
+    uint256 _amountGet,
+    address _tokenGive,
+    uint256 _amountGive (orderAmount * orderPrice)
+    */
+    const tokenGet = tokens[1].address
+    const amountGet = ethers.utils.parseUnits((order.amount * order.price).toString() ,18)
+    const tokenGive = tokens[0].address
+    const amountGive = ethers.utils.parseUnits(order.amount,18)
+    dispatch({type: 'NEW_ORDER_REQUEST'})
+    
+    try{
+        const signer = await provider.getSigner()
+        // the name Makebuy order is a function in exchange
+        const transaction = await exchange.connect(signer).makeOrder(tokenGet, amountGet, tokenGive, amountGive)
+        await transaction.wait()
+    } catch(error) {
+        dispatch({type: 'NEW_ORDER_FAIL'})
+    } 
 }
