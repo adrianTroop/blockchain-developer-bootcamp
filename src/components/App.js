@@ -7,6 +7,7 @@ import { loadProvider,
           loadAccount,
           loadTokens,
           loadExchange,
+          loadAllOrders,
           subscribeToEvents
        } from '../store/interactions';
 
@@ -15,6 +16,9 @@ import Markets from './Markets';
 import Balance from './Balance';
 import Order from './Order';
 import OrderBook from './OrderBook';
+import Trades from './Trades';
+import Transactions from './Transactions'
+import PriceChart from './PriceChart';
 
 
 function App() {
@@ -46,6 +50,9 @@ function App() {
     const exchangeConfig = config[chainId].exchange
     const exchange = await loadExchange(provider,exchangeConfig.address,dispatch)
 
+    //Fetch all orders: Open, filled and cancelled
+    loadAllOrders(provider, exchange, dispatch)
+  
     // We want to set up the subscribee event here to be able to use it on all the events so we set it up in the APP.js(Top element)
   
     //Subscribing to events Listening to events
@@ -73,11 +80,11 @@ function App() {
         </section>
         <section className='exchange__section--right grid'>
 
-          {/* PriceChart */}
+        < PriceChart />
 
-          {/* Transactions */}
+          < Transactions />
 
-          {/* Trades */}
+          < Trades />
 
           < OrderBook />
 

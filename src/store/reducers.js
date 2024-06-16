@@ -1,8 +1,5 @@
 //Reducers
 //This 'export' allows to use this info in other files.
-
-import { isError } from "lodash"
-
 //handles it all the connection info
 export const provider = (state = {} , action) =>{
     switch(action.type){
@@ -91,15 +88,83 @@ const DEFAULT_EXCHANGE_STATE = {
 
 export const exchange = (state = DEFAULT_EXCHANGE_STATE , action) =>{
     let index, data
+
     switch(action.type){
         case 'EXCHANGE_LOADED':
             return{
                 //check current state but dont modify it just update it
                 ...state,
-                loaded:true,
+                loaded: true,
                 contract: action.exchange
             }
-
+        case 'CANCELLED_ORDERS_LOADED':
+            return {
+                ...state,
+                cancelledOrders: {
+                loaded: true,
+                data: action.cancelledOrders
+                }
+            }
+        case 'FILLED_ORDERS_LOADED':
+            return {
+                ...state,
+                filledOrders: {
+                loaded: true,
+                data: action.filledOrders
+                }
+        }
+        
+        case 'ALL_ORDERS_LOADED':
+            return{
+                ...state,
+                allOrders: {
+                    loaded: true,
+                    data: action.allOrders
+                }
+            }
+        
+        
+        ////////// CANCELLING ORDERS ////////////
+        
+        case 'ORDER_CANCEL_REQUEST':
+            return {
+                ...state,
+                transaction:{
+                    transactionType: 'Cancel',
+                    isPending: true,
+                    isSuccesful: false
+                }
+            }
+        
+        case 'ORDER_CANCEL_SUCCESS':
+            return {
+                ...state,
+                transaction:{
+                    transactionType: 'Cancel',
+                    isPending: false,
+                    isSuccesful: true
+                },
+                cancelledOrders: {
+                    ...state.cancelledOrders,
+                    data: [
+                        ...state.cancelledOrders.data,
+                        action.order
+                    ]
+                },
+                events: [action.event, ...state.events]
+            }
+        
+        case 'ORDER_CANCEL_FAIL':
+            return {
+                ...state,
+                transaction: {
+                    transactionType: 'Cancel',
+                    isPending:false,
+                    isSuccesful: false,
+                    isError: true
+                }
+            }
+    
         //BALANCES
         case 'EXCHANGE_TOKEN_1_BALANCE_LOADED':
             return{
@@ -161,7 +226,9 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE , action) =>{
 
         case 'NEW_ORDER_SUCCESS':
             //Prevent duplicate orders
-            index = state.allOrders.data.findIndex(order => order.id === action.orderId)
+            //REMOVE THE .toString() from id
+            index = state.allOrders.data.findIndex(order => order.id.toString() === action.order.id.toString())
+
             if(index === -1){
                 data = [...state.allOrders.data, action.order]
             } else {
@@ -178,6 +245,7 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE , action) =>{
                     isPending: false,
                     isSuccesful: true
                 },
+                events: [action.event, ...state.events]
             }
 
         case 'NEW_ORDER_FAIL':

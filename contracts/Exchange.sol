@@ -180,8 +180,8 @@ contract Exchange{
             _order.tokenGet,
             _order.amountGet,
             _order.tokenGive,
-            _order.amountGive);
-
+            _order.amountGive
+        );
         //add to orderFilled mapping
         orderFilled[_order.id] = true;
     }

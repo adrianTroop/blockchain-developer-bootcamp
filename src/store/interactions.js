@@ -55,6 +55,10 @@ export const loadExchange = async (provider, address, dispatch) => {
 
 //Function that subscribe to events and get the confirmation from BC that transfers are succesful
 export const subscribeToEvents = (exchange, dispatch)=>{
+    exchange.on('Cancel', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
+        const order = event.args
+        dispatch({type: 'ORDER_CANCEL_SUCCESS', order, event})
+    })
     //Subscribe to the event deposit and take all the values to check details
     exchange.on('Deposit', (token, user, amount, balance, event)=>{
         //Notify app that transfer was succesful
@@ -65,7 +69,7 @@ export const subscribeToEvents = (exchange, dispatch)=>{
         dispatch({type : 'TRANSFER_SUCCESS', event})
     })
     //We listening to the event and the function need to accept all the values from the event.
-    exchange.on('Order', (id, user,tokenGet,amountGet,tokenGive,amountGive,timestamp,event) => {
+    exchange.on('Order', (id, user, tokenGet, amountGet, tokenGive, amountGive, timestamp, event) => {
         const order = event.args
         dispatch({type: 'NEW_ORDER_SUCCESS', order, event})
     })
@@ -90,15 +94,26 @@ export const loadBalances = async (exchange, tokens, account, dispatch) => {
 ////////////////////////////////////////////////////////////
 //////////////  LOAD ALL ORDERS /////////////////////////////
 
-export const loadAllOrders = async(provider, exchange, dispatch)
-{
+export const loadAllOrders = async (provider, exchange, dispatch) =>{
     const block = await provider.getBlockNumber()
+
+    // Fetch canceled orders
+    const cancelStream = await exchange.queryFilter('Cancel', 0, block)
+    const cancelledOrders = cancelStream.map(event => event.args)
+
+    dispatch({ type: 'CANCELLED_ORDERS_LOADED', cancelledOrders })
+
+  // Fetch filled orders
+    const tradeStream = await exchange.queryFilter('Trade', 0, block)
+    const filledOrders = tradeStream.map(event => event.args)
+
+    dispatch({ type: 'FILLED_ORDERS_LOADED', filledOrders })
 
     //Getting all order throught a query on the event so we can see all past orders.
     const orderStream = await exchange.queryFilter('Order', 0, block)
     const allOrders = orderStream.map(event => event.args)
-
-    dispatch({type: 'ALL_ORDERS_LOADED', allOrders})
+    console.log("exchange", await allOrders)
+    dispatch({ type: 'ALL_ORDERS_LOADED', allOrders })
 }
 
 
@@ -177,5 +192,20 @@ export const makeSellOrder = async (provider,exchange, tokens, order, dispatch) 
         await transaction.wait()
     } catch(error) {
         dispatch({type: 'NEW_ORDER_FAIL'})
+    } 
+}
+
+///////////////// CANCEL ORDERS //////////////
+
+export const cancelOrder = async (provider, exchange, order, dispatch) => {
+    dispatch({type: 'ORDER_CANCEL_REQUEST'})
+    
+    try{
+        const signer = await provider.getSigner()
+        // the name Makebuy order is a function in exchange
+        const transaction = await exchange.connect(signer).cancelOrder(order.id)
+        await transaction.wait()
+    } catch(error) {
+        dispatch({type: 'ORDER_CANCEL_FAIL'})
     } 
 }
