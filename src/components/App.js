@@ -19,6 +19,7 @@ import OrderBook from './OrderBook';
 import Trades from './Trades';
 import Transactions from './Transactions'
 import PriceChart from './PriceChart';
+import Alert from './Alert';
 
 
 function App() {
@@ -45,7 +46,7 @@ function App() {
     //Load token contracts maybe i move the address to the const definition Still not sure
     const DApp = config[chainId].DApp.address
     const mEth = config[chainId].mETH.address
-    await loadTokens(provider, [DApp,mEth], dispatch)
+    await loadTokens(provider, [DApp, mEth], dispatch)
     
     const exchangeConfig = config[chainId].exchange
     const exchange = await loadExchange(provider,exchangeConfig.address,dispatch)
@@ -91,7 +92,7 @@ function App() {
         </section>
       </main>
 
-      {/* Alert */}
+      < Alert />
 
     </div>
   );

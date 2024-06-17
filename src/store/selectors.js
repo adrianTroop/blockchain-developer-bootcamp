@@ -11,8 +11,12 @@ const GREEN = '#25CE8F'
 const RED = '#F45353'
 
 //Special function we get from lodash
-const account = state => get(state, 'provide.account')
+const account = state => get(state, 'provider.account')
 const tokens = state => get(state, 'tokens.contracts')
+const events = state => get(state, 'exchange.events')
+
+
+
 const allOrders = state => get(state, 'exchange.allOrders.data', [])
 const cancelledOrders = state => get(state, 'exchange.cancelledOrders.data', [])
 const filledOrders = state => get(state, 'exchange.filledOrders.data', [])
@@ -29,6 +33,17 @@ const openOrders = state => {
       })
     return openOrders
 }
+///////////////// MY EVENTS ////////////////////
+
+export const myEventsSelector = createSelector(
+    account,
+    events,
+    (account, events) =>{
+        console.log(events)
+    events = events.filter((e) => e.args.user === account)
+    console.log(events)
+    return events
+})
 
 /////////////// MY OPEN ORDERS ////////////////
 
@@ -46,9 +61,6 @@ export const myOpenOrdersSelector = createSelector(
         orders = decorateMyOpenOrders(orders, tokens)
 
         orders = orders.sort((a,b) => b.timestamp - a.timestamp)
-
-        console.log("orders", orders)
-
         return orders
     }
 )
@@ -113,6 +125,8 @@ export const filledOrdersSelector = createSelector(
 
         orders = decorateFilledOrders(orders, tokens)
         
+        orders = orders.sort((a, b) => b.timestamp - a.timestamp)
+
         return orders
     }
 )
@@ -235,7 +249,6 @@ export const orderBookSelector = createSelector(
         }
 
         const sellOrders = get(orders, 'sell', [])
-        console.log(sellOrders)
 
         orders = {
             ...orders,
@@ -249,7 +262,6 @@ const decorateOrderBookOrders = (orders, tokens) => {
         orders.map((order) => {
             order = decorateOrder(order,tokens)
             order = decorateOrderBookOrder(order, tokens)
-            //console.log("order", order)
             return(order)
         })
     )

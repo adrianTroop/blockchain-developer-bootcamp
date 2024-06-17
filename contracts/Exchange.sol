@@ -20,13 +20,15 @@ contract Exchange{
         address token,
         address user,
         uint256 amount,
-        uint256 balance);
+        uint256 balance
+    );
 
     event Withdraw(
         address token,
         address user,
         uint256 amount,
-        uint256 balance);
+        uint256 balance
+    );
 
     event Order (
         uint256 id, 
@@ -36,7 +38,7 @@ contract Exchange{
         address tokenGive,
         uint256 amountGive,
         uint256 timestamp 
-        );
+    );
     
     event Cancel (
         uint256 id, 
@@ -46,7 +48,7 @@ contract Exchange{
         address tokenGive,
         uint256 amountGive,
         uint256 timestamp 
-        );
+    );
 
     event Trade (
         uint256 id, 
@@ -57,7 +59,8 @@ contract Exchange{
         uint256 amountGive,
         address creator,
         uint256 timestamp 
-        );
+    );
+
     //DETAILS OF THE ORDERS
     struct _Order {
         uint256 id; // unique identifier for the order
@@ -79,11 +82,11 @@ contract Exchange{
         //Transfer token to exchange
         //Talk to the Token.sol contract
         //Require to send tokens to exchange to have a layer of security in case soemthing happens
-        require(Token(_token).transferFrom(msg.sender, address(this),_amount));
+        require(Token(_token).transferFrom(msg.sender, address(this), _amount));
         //Update user balance
         tokens[_token][msg.sender] = tokens[_token][msg.sender] + _amount;
         //Emit an event
-        emit Deposit(_token, msg.sender,_amount,tokens[_token][msg.sender]);
+        emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
     function withdrawToken(address _token, uint256 _amount) public {
@@ -94,7 +97,7 @@ contract Exchange{
         // if there is no tokens the value is ZERO by default
         tokens[_token][msg.sender] = tokens[_token][msg.sender] - _amount;
         //Emit Event
-        emit Withdraw(_token, msg.sender,_amount,tokens[_token][msg.sender]);
+        emit Withdraw(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
     //Check balances of tokens on users address

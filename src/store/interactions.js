@@ -1,7 +1,6 @@
 import { ethers } from 'ethers'
 import TOKEN_ABI from '../abis/Token.json'
 import EXCHANGE_ABI from '../abis/Exchange.json'
-import { exchange, provider } from './reducers'
 
 export const loadProvider = (dispatch) => {
     //connecting ethers to the BC
@@ -59,6 +58,10 @@ export const subscribeToEvents = (exchange, dispatch)=>{
         const order = event.args
         dispatch({type: 'ORDER_CANCEL_SUCCESS', order, event})
     })
+    exchange.on('Trade', (id, user, tokenGet, amountGet, tokenGive, amountGive, creator, timestamp, event) => {
+        const order = event.args
+        dispatch({ type: 'ORDER_FILL_SUCCESS', order, event })
+      })
     //Subscribe to the event deposit and take all the values to check details
     exchange.on('Deposit', (token, user, amount, balance, event)=>{
         //Notify app that transfer was succesful
@@ -80,6 +83,7 @@ export const loadBalances = async (exchange, tokens, account, dispatch) => {
     let balance = ethers.utils.formatUnits(await tokens[0].balanceOf(account),18)
     //We use the same variable because we dispatch so we can re write the variable
     dispatch({type: 'TOKEN_1_BALANCE_LOADED', balance})
+
     balance = ethers.utils.formatUnits(await exchange.balanceOf(tokens[0].address, account),18)
     dispatch({type: 'EXCHANGE_TOKEN_1_BALANCE_LOADED', balance})
 
@@ -112,7 +116,6 @@ export const loadAllOrders = async (provider, exchange, dispatch) =>{
     //Getting all order throught a query on the event so we can see all past orders.
     const orderStream = await exchange.queryFilter('Order', 0, block)
     const allOrders = orderStream.map(event => event.args)
-    console.log("exchange", await allOrders)
     dispatch({ type: 'ALL_ORDERS_LOADED', allOrders })
 }
 
@@ -130,6 +133,7 @@ export const transferTokens = async (provider, exchange, transferType, token, am
         //User will be the signer
         const signer = await provider.getSigner()
         const amountToTransfer = ethers.utils.parseUnits(amount.toString(),18)
+
         if(transferType === 'Deposit'){
             transaction = await token.connect(signer).approve(exchange.address, amountToTransfer)
             await transaction.wait()
@@ -158,6 +162,7 @@ export const makeBuyOrder = async (provider,exchange, tokens, order, dispatch) =
     const amountGet = ethers.utils.parseUnits(order.amount,18)
     const tokenGive = tokens[1].address
     const amountGive = ethers.utils.parseUnits((order.amount * order.price).toString() ,18)
+
     dispatch({type: 'NEW_ORDER_REQUEST'})
     
     try{
@@ -209,3 +214,18 @@ export const cancelOrder = async (provider, exchange, order, dispatch) => {
         dispatch({type: 'ORDER_CANCEL_FAIL'})
     } 
 }
+
+// ------------------------------------------------------------------------------
+// FILL ORDER
+
+export const fillOrder = async (provider, exchange, order, dispatch) => {
+    dispatch({ type: 'ORDER_FILL_REQUEST' })
+  
+    try {
+      const signer = await provider.getSigner()
+      const transaction = await exchange.connect(signer).fillOrder(order.id)
+      await transaction.wait()
+    } catch (error) {
+      dispatch({ type: 'ORDER_FILL_FAIL' })
+    }
+  }

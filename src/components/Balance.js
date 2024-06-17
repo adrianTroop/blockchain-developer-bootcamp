@@ -94,7 +94,7 @@ const Balance = () => {
             loadBalances(exchange, tokens, account, dispatch)
         } 
         //If any of this reload the page again dispatch need?
-    }, [exchange, tokens, account, dispatch, transferInProgress])
+    }, [exchange, tokens, account, dispatch, transferInProgress, dispatch])
 
     return ( 
       <div className='component exchange__transfers'>

@@ -10,16 +10,16 @@ import sort from '../assets/sort.svg'
 import { cancelOrder } from "../store/interactions";
 
 import Banner from "./Banner";
-import { exchange } from "../store/reducers";
 
 const Transactions = () => {
-
   const [showMyOrder, setShowMyOrders] = useState(true)
+
   const provider = useSelector(state => state.provider.connection)
   const symbols = useSelector(state => state.tokens.symbols)
   const exchange = useSelector(state => state.exchange.contract)
   const myOpenOrders = useSelector(myOpenOrdersSelector)
   const myFilledOrders = useSelector(myFilledOrdersSelector)
+  
   const dispatch = useDispatch()
   const tradeRef = useRef(null)
   const orderRef = useRef(null)
@@ -38,7 +38,6 @@ const Transactions = () => {
   }
 
   const cancelHandler = (order) => {
-    console.log("Cancel" , order)
     cancelOrder(provider,exchange, order, dispatch)
   }
 
