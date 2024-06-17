@@ -3,7 +3,7 @@
 //loaddash let us get special function from JS 
 
 import { createSelector } from 'reselect'
-import { get, groupBy, reject, maxBy, minBy, filter } from 'lodash';
+import { get, groupBy, reject, maxBy, minBy } from 'lodash';
 import moment from 'moment';
 import { ethers } from 'ethers';
 

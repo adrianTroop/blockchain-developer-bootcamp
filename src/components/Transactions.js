@@ -19,7 +19,7 @@ const Transactions = () => {
   const exchange = useSelector(state => state.exchange.contract)
   const myOpenOrders = useSelector(myOpenOrdersSelector)
   const myFilledOrders = useSelector(myFilledOrdersSelector)
-  
+
   const dispatch = useDispatch()
   const tradeRef = useRef(null)
   const orderRef = useRef(null)
@@ -101,11 +101,13 @@ const Transactions = () => {
             <tbody>
 
                 {myFilledOrders && myFilledOrders.map((order,index) => {
-                  <tr key={index}>
+                  return(
+                    <tr key={index}>
                     <td>{order.formattedTimestamp}</td>
                     <td style={{color: `${order.orderClass}`}}>{order.orderSign}{order.token0Amount}</td>
                     <td>{order.tokenPrice}</td>
                 </tr>
+                  )
                 })}
   
             </tbody>
